@@ -6,6 +6,7 @@ var { Todo } = require('./models/todo.js');
 var { User } = require('./models/user.js');
 
 var app = express();
+const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
@@ -29,25 +30,40 @@ app.get('/todos', (req, res) => {
     })
 });
 
-app.get('/todos/:id',(req,res)=>{
+app.get('/todos/:id', (req, res) => {
     var id = req.params.id;
     if (!ObjectId.isValid(id)) {
         return res.status(404).send();
     }
-    Todo.findById(id).then((todos)=>{
-        if(todos){
-            res.send({todos});
+    Todo.findById(id).then((todos) => {
+        if (todos) {
+            res.send({ todos });
         }
-        else{
+        else {
             return res.status(404).send();
         }
-    }).catch((e)=>{
+    }).catch((e) => {
         res.status(400).send();
     });
-})
+});
 
-app.listen(3000, () => {
-    console.log('Started on port 3000');
+app.delete('/todos/:id', (req, res) => {
+    var id = req.params.id;
+    if (!ObjectId.isValid(id)) {
+        return res.status(404).send();
+    }
+    Todo.findByIdAndRemove(id).then((doc) => {
+        if (!doc) {
+            res.status(404).send();
+        }
+        res.send({ doc });
+    }).catch((e) => {
+        res.status(400).send();
+    });
+});
+
+app.listen(port, () => {
+    console.log(`Started on port ${port}`);
 });
 
 module.exports = { app };
